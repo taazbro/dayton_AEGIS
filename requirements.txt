@@ -1,0 +1,20 @@
+# Zyberpol AEGIS Dependencies
+# Python 3.10+ required
+
+# Core Dependencies
+sentry-sdk>=1.40.0
+anthropic>=0.18.0
+python-dotenv>=1.0.0
+
+# Dashboard & UI
+rich>=13.7.0
+
+# BrowserUse (Optional)
+playwright>=1.40.0
+
+# Additional utilities
+pyyaml>=6.0.1
+requests>=2.31.0
+
+# Security & Encryption
+cryptography>=41.0.0

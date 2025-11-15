@@ -1,0 +1,10 @@
+{
+  "dsn": "REPLACE_WITH_SENTRY_DSN",
+  "environment": "daytona-aegis",
+  "traces_sample_rate": 1.0,
+  "send_default_pii": true,
+  "debug": false,
+  "attach_stacktrace": true,
+  "max_breadcrumbs": 50,
+  "before_send": null
+}

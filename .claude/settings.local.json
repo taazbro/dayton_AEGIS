@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -u main.py)",
+      "Bash(chmod +x tools/secrets_manager.py)",
+      "Bash(chmod +x tools/auto_sync.sh)",
+      "Bash(pip install cryptography --quiet)",
+      "Bash(export AEGIS_MASTER_PASSWORD=\"aegis-daytona-2025-hackathon-secure-key\")",
+      "Bash(python3 tools/secrets_manager.py encrypt-env)",
+      "Bash(bash tools/auto_sync.sh once)",
+      "Bash(git add -A)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,99 @@
+# Zyberpol AEGIS Agent Configuration
+
+# Detection Settings
+detection:
+  # Sliding window for rate analysis (seconds)
+  window_seconds: 60
+
+  # Detection thresholds
+  thresholds:
+    credential_attempts: 3
+    port_scans: 5
+    exploitation_attempts: 2
+    exfiltration_attempts: 1
+
+  # Enable/disable specific detectors
+  enabled_detectors:
+    - rate_based
+    - pattern_based
+    - sequence_based
+
+# Response Settings
+response:
+  # Automatic response actions
+  auto_response: true
+
+  # Response delays (seconds)
+  delays:
+    kill_switch: 0
+    quarantine: 1
+    credential_rotation: 2
+
+  # Notification settings
+  notifications:
+    slack_enabled: false
+    email_enabled: false
+
+# Attack Simulator Settings
+simulator:
+  # Enable simulator (disable in production)
+  enabled: true
+
+  # Delay between attack sequences (seconds)
+  sequence_delay_min: 5
+  sequence_delay_max: 15
+
+  # Event delays within sequences (seconds)
+  event_delay_min: 0.5
+  event_delay_max: 2.0
+
+# BrowserUse Settings
+browseruse:
+  # Enable BrowserUse replay
+  enabled: true
+
+  # Mock mode (no actual browser automation)
+  mock_mode: true
+
+  # Headless browser
+  headless: true
+
+  # Timeout for replay operations (seconds)
+  timeout: 30
+
+# Forensics Settings
+forensics:
+  # Enable Claude AI analysis
+  claude_enabled: true
+
+  # Claude model to use
+  claude_model: "claude-sonnet-4-5-20250929"
+
+  # Save reports to disk
+  save_reports: true
+
+  # Report output directory
+  report_directory: "./reports"
+
+# Dashboard Settings
+dashboard:
+  # Dashboard refresh rate (seconds)
+  refresh_rate: 1
+
+  # Maximum incidents to display
+  max_incidents: 15
+
+  # Use Rich library for enhanced UI
+  use_rich: true
+
+# Logging Settings
+logging:
+  # Log level
+  level: "INFO"
+
+  # Log format
+  format: "simple"
+
+  # Log to file
+  file_enabled: false
+  file_path: "./logs/aegis.log"

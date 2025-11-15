@@ -1,0 +1,9 @@
+{
+  "api_key": "REPLACE_WITH_DAYTONA_API_KEY",
+  "api_url": "https://app.daytona.io/api",
+  "workspace_id": null,
+  "project_name": "zyberpol-aegis",
+  "environment": "development",
+  "auto_sync": true,
+  "sync_interval_seconds": 300
+}
