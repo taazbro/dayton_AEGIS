@@ -9,6 +9,13 @@ from typing import Dict, Any, List
 import time
 import os
 
+# Try to import BrowserUse SDK
+try:
+    from browser_use_sdk import BrowserUseClient
+    BROWSERUSE_SDK_AVAILABLE = True
+except ImportError:
+    BROWSERUSE_SDK_AVAILABLE = False
+
 
 def replay_attack(incident: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -34,10 +41,21 @@ def replay_attack(incident: Dict[str, Any]) -> Dict[str, Any]:
     threat_type = incident.get("threat_type", "unknown")
     event_sequence = incident.get("event_sequence", [])
 
-    browseruse_enabled = bool(os.getenv("BROWSERUSE_KEY"))
+    browseruse_key = os.getenv("BROWSERUSE_KEY")
+    browseruse_enabled = bool(browseruse_key)
+    use_real_api = browseruse_enabled and BROWSERUSE_SDK_AVAILABLE
 
     print(f"🔍 Analyzing: {threat_type}")
-    print(f"🤖 BrowserUse Status: {'Enabled' if browseruse_enabled else 'Demo Mode'}")
+    print(f"🤖 BrowserUse Status: {'SDK Enabled' if use_real_api else 'Simulation Mode'}")
+
+    # Initialize BrowserUse client if available
+    browseruse_client = None
+    if use_real_api:
+        try:
+            browseruse_client = BrowserUseClient(api_key=browseruse_key)
+            print(f"   ✓ BrowserUse SDK initialized")
+        except Exception as e:
+            print(f"   ⚠️  BrowserUse SDK init failed: {e}, using simulation")
 
     if event_sequence:
         print(f"📋 Attack Sequence: {' → '.join(event_sequence)}")

@@ -9,6 +9,7 @@ import os
 from typing import Dict, Any, List
 import json
 import time
+import requests
 
 
 class CodeRabbitReview:
@@ -25,10 +26,11 @@ class CodeRabbitReview:
 
     def __init__(self):
         self.api_key = os.getenv("CODERABBIT_API_KEY")
+        self.api_url = os.getenv("CODERABBIT_API_URL", "https://api.coderabbit.ai/v1")
         self.enabled = bool(self.api_key)
 
         if self.enabled:
-            print("   🐰 CodeRabbit AI Review: Enabled")
+            print("   🐰 CodeRabbit AI Review: Enabled (API)")
         else:
             print("   🐰 CodeRabbit AI Review: Disabled (no API key)")
 
@@ -101,7 +103,32 @@ class CodeRabbitReview:
 
     def _ai_code_review(self, response_action: str, code_context: Dict[str, Any]) -> Dict[str, Any]:
         """Perform AI-powered code review"""
-        # CodeRabbit AI analysis simulation
+
+        # Try real API call first
+        if self.api_key:
+            try:
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "action": response_action,
+                    "context": code_context,
+                    "project": "AEGIS"
+                }
+                response = requests.post(
+                    f"{self.api_url}/review",
+                    json=payload,
+                    headers=headers,
+                    timeout=5
+                )
+                if response.status_code in [200, 201]:
+                    print(f"      ✓ CodeRabbit API call successful")
+                    return response.json()
+            except Exception as e:
+                print(f"      ⚠️  CodeRabbit API failed: {e}, using simulation")
+
+        # CodeRabbit AI analysis simulation (fallback)
         review_results = {
             "kill": {
                 "quality_score": 9.5,

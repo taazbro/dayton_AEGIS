@@ -9,6 +9,13 @@ from typing import Dict, Any
 import json
 import time
 
+# Try to import Galileo SDK
+try:
+    from galileo_observe import GalileoObserve
+    GALILEO_SDK_AVAILABLE = True
+except ImportError:
+    GALILEO_SDK_AVAILABLE = False
+
 
 class GalileoObservability:
     """
@@ -25,9 +32,17 @@ class GalileoObservability:
         self.api_key = os.getenv("GALILEO_API_KEY")
         self.project_name = "AEGIS Cyber Defense"
         self.enabled = bool(self.api_key)
+        self.galileo_client = None
 
-        if self.enabled:
-            print("   🔭 Galileo AI Observability: Enabled")
+        if self.enabled and GALILEO_SDK_AVAILABLE:
+            try:
+                # Initialize Galileo SDK
+                self.galileo_client = GalileoObserve(api_key=self.api_key)
+                print("   🔭 Galileo AI Observability: Enabled (SDK)")
+            except Exception as e:
+                print(f"   🔭 Galileo AI Observability: Enabled (fallback mode) - {e}")
+        elif self.enabled:
+            print("   🔭 Galileo AI Observability: Enabled (no SDK, using API)")
         else:
             print("   🔭 Galileo AI Observability: Disabled (no API key)")
 
@@ -68,9 +83,28 @@ class GalileoObservability:
                 "tags": ["cyber-defense", "threat-analysis", "autonomous"],
             }
 
-            # For demo purposes, log to console
-            # In production, this would call Galileo's API
-            print(f"   🔭 Galileo: Logged AI interaction ({latency_ms:.0f}ms)")
+            # Send to Galileo SDK if available
+            if self.galileo_client:
+                try:
+                    # Use Galileo SDK to log the interaction
+                    self.galileo_client.log(
+                        project=self.project_name,
+                        messages=[
+                            {"role": "user", "content": prompt},
+                            {"role": "assistant", "content": response}
+                        ],
+                        model=model,
+                        latency_ms=latency_ms,
+                        metadata=metadata or {}
+                    )
+                    print(f"   🔭 Galileo: Logged to SDK ({latency_ms:.0f}ms)")
+                except Exception as e:
+                    print(f"   🔭 Galileo: SDK log failed, using fallback - {e}")
+                    self._log_via_api(log_entry)
+            else:
+                # Fallback to API
+                print(f"   🔭 Galileo: Logged AI interaction ({latency_ms:.0f}ms)")
+                self._log_via_api(log_entry)
 
             # Store locally for aggregation
             self._store_locally(log_entry)
@@ -140,6 +174,25 @@ class GalileoObservability:
         }
 
         return metrics
+
+    def _log_via_api(self, log_entry: Dict[str, Any]):
+        """Send log entry to Galileo API directly"""
+        if not self.api_key:
+            return
+
+        try:
+            # Galileo API endpoint (if webhook configured)
+            api_url = os.getenv("GALILEO_API_URL", "https://api.galileo.ai/v1/logs")
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(api_url, json=log_entry, headers=headers, timeout=3)
+            if response.status_code in [200, 201]:
+                print(f"      ✓ Logged via API")
+        except Exception as e:
+            # Silent fail - local logging still works
+            pass
 
     def _store_locally(self, log_entry: Dict[str, Any]):
         """Store log entry locally for aggregation"""

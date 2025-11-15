@@ -11,6 +11,13 @@ from typing import Dict, Any
 import json
 import time
 
+# Try to import Daytona SDK
+try:
+    from daytona_sdk import DaytonaClient
+    DAYTONA_SDK_AVAILABLE = True
+except ImportError:
+    DAYTONA_SDK_AVAILABLE = False
+
 
 class DaytonaSync:
     """
@@ -28,9 +35,17 @@ class DaytonaSync:
         self.api_url = os.getenv("DAYTONA_API_URL", "https://app.daytona.io/api")
         self.project_name = "AEGIS Cyber Defense"
         self.enabled = bool(self.api_key)
+        self.daytona_client = None
 
-        if self.enabled:
-            print("   🚀 Daytona IDE Sync: Enabled")
+        if self.enabled and DAYTONA_SDK_AVAILABLE:
+            try:
+                # Initialize Daytona SDK
+                self.daytona_client = DaytonaClient(api_key=self.api_key, base_url=self.api_url)
+                print("   🚀 Daytona IDE Sync: Enabled (SDK)")
+            except Exception as e:
+                print(f"   🚀 Daytona IDE Sync: Enabled (API fallback) - {e}")
+        elif self.enabled:
+            print("   🚀 Daytona IDE Sync: Enabled (API)")
         else:
             print("   🚀 Daytona IDE Sync: Disabled (no API key)")
 
@@ -126,7 +141,33 @@ class DaytonaSync:
                 "type": "incident"
             }
 
-            print(f"   🚀 Daytona: Incident synced to cloud IDE")
+            print(f"   🚀 Daytona: Syncing incident...")
+
+            # Try SDK first, then API fallback
+            synced = False
+            if self.daytona_client:
+                try:
+                    # Use Daytona SDK to sync
+                    self.daytona_client.sync_data(incident_payload)
+                    print(f"      ✓ Synced via SDK")
+                    synced = True
+                except Exception as e:
+                    print(f"      ⚠️  SDK failed: {e}, using API")
+
+            # Fallback to REST API
+            if not synced and self.api_key:
+                try:
+                    headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+                    response = requests.post(
+                        f"{self.api_url}/sync/incidents",
+                        json=incident_payload,
+                        headers=headers,
+                        timeout=3
+                    )
+                    if response.status_code in [200, 201]:
+                        print(f"      ✓ Synced via API (HTTP {response.status_code})")
+                except Exception as e:
+                    print(f"      ⚠️  API call failed: {e}")
 
             self._store_sync_locally(incident_payload)
 
