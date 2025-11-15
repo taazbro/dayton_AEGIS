@@ -1,0 +1,163 @@
+"""
+Jira API Integration — Automatic ticket creation for security incidents
+"""
+
+import os
+import requests
+from typing import Dict, Any
+import json
+import base64
+
+
+class JiraIntegration:
+    """Create Jira tickets for security incidents"""
+
+    def __init__(self):
+        self.jira_url = os.getenv("JIRA_URL", "https://your-domain.atlassian.net")
+        self.jira_email = os.getenv("JIRA_EMAIL")
+        self.jira_api_token = os.getenv("JIRA_API_TOKEN")
+        self.jira_project = os.getenv("JIRA_PROJECT", "SEC")
+
+    def create_incident_ticket(self, threat_report: Dict[str, Any]) -> bool:
+        """
+        Create a Jira ticket for a security incident.
+
+        Args:
+            threat_report: Threat report dictionary
+
+        Returns:
+            True if ticket created successfully
+        """
+        if not (self.jira_email and self.jira_api_token):
+            print("⚠️  Jira credentials not configured")
+            return False
+
+        try:
+            incident = threat_report.get("incident_summary", {})
+            severity = incident.get("severity", "UNKNOWN").upper()
+
+            # Only create tickets for MEDIUM, HIGH, or CRITICAL incidents
+            if severity not in ["MEDIUM", "HIGH", "CRITICAL"]:
+                return False
+
+            # Build Jira issue
+            issue_data = {
+                "fields": {
+                    "project": {
+                        "key": self.jira_project
+                    },
+                    "summary": f"🚨 Security Incident: {incident.get('threat_type', 'Unknown Threat')}",
+                    "description": self._build_description(threat_report),
+                    "issuetype": {
+                        "name": "Bug"  # or "Incident" if available
+                    },
+                    "priority": {
+                        "name": self._map_priority(severity)
+                    },
+                    "labels": [
+                        "security",
+                        "aegis",
+                        f"severity-{severity.lower()}",
+                        f"threat-{incident.get('threat_type', 'unknown').replace(' ', '-').lower()}"
+                    ]
+                }
+            }
+
+            # Add assignee if configured
+            assignee = os.getenv("JIRA_DEFAULT_ASSIGNEE")
+            if assignee:
+                issue_data["fields"]["assignee"] = {"emailAddress": assignee}
+
+            # Create auth header
+            auth_string = f"{self.jira_email}:{self.jira_api_token}"
+            auth_bytes = auth_string.encode('ascii')
+            auth_base64 = base64.b64encode(auth_bytes).decode('ascii')
+
+            headers = {
+                "Authorization": f"Basic {auth_base64}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+
+            response = requests.post(
+                f"{self.jira_url}/rest/api/3/issue",
+                json=issue_data,
+                headers=headers,
+                timeout=10
+            )
+
+            if response.status_code == 201:
+                issue_key = response.json().get("key")
+                print(f"✅ Jira ticket created: {issue_key}")
+                return True
+            else:
+                print(f"❌ Jira API error: {response.status_code} - {response.text}")
+                return False
+
+        except Exception as e:
+            print(f"❌ Jira integration failed: {e}")
+            return False
+
+    def _build_description(self, threat_report: Dict[str, Any]) -> str:
+        """Build Jira ticket description"""
+        incident = threat_report.get("incident_summary", {})
+
+        description = f"""
+h2. Security Incident Alert from AEGIS
+
+*Threat Type:* {incident.get('threat_type', 'Unknown')}
+*Severity:* {incident.get('severity', 'UNKNOWN')}
+*Status:* Detected and Responded
+*Timestamp:* {threat_report.get('timestamp', 'N/A')}
+
+h3. Incident Details
+
+*Action Taken:* {incident.get('action_taken', 'None')}
+*Event Count:* {incident.get('event_count', 0)}
+*Affected Entities:* {', '.join(incident.get('affected_entities', [])[:5]) or 'None'}
+*Attack Pattern:* {incident.get('attack_pattern', 'N/A')}
+
+h3. Detection
+
+*Detection Engines:* {', '.join(threat_report.get('detection_engines', []))}
+"""
+
+        # Add MITRE ATT&CK techniques
+        mitre_tags = threat_report.get("mitre_tags", [])
+        if mitre_tags:
+            description += "\nh3. MITRE ATT&CK Techniques\n\n"
+            for tag in mitre_tags[:5]:
+                description += f"* [{tag.get('technique')}|https://attack.mitre.org/techniques/{tag.get('technique')}] - {tag.get('tactic')}\n"
+
+        # Add recommendations
+        recommendations = threat_report.get("recommendations", [])
+        if recommendations:
+            description += "\nh3. Security Recommendations\n\n"
+            for rec in recommendations[:5]:
+                description += f"* {rec}\n"
+
+        description += "\n---\n_Generated by AEGIS Autonomous Cyber Defense System_"
+
+        return description
+
+    def _map_priority(self, severity: str) -> str:
+        """Map AEGIS severity to Jira priority"""
+        mapping = {
+            "CRITICAL": "Highest",
+            "HIGH": "High",
+            "MEDIUM": "Medium",
+            "LOW": "Low"
+        }
+        return mapping.get(severity, "Medium")
+
+
+# Global instance
+_jira_integration = None
+
+
+def get_jira_integration() -> JiraIntegration:
+    """Get singleton Jira integration instance"""
+    global _jira_integration
+    if _jira_integration is None:
+        _jira_integration = JiraIntegration()
+    return _jira_integration

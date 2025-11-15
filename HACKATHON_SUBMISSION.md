@@ -27,12 +27,38 @@ AEGIS is an **autonomous cyber defense agent** that detects, analyzes, and respo
 
 ## ✨ Features Built
 
-### 🛡️ Detection System (5 Engines)
+### 🛡️ Detection System (7 Engines)
 1. **Pattern Detector** - Rule-based threat identification
 2. **Rate Analyzer** - Sliding window anomaly detection
 3. **Anomaly Detector** - Statistical analysis (z-scores)
 4. **Behavioral Detector** - User/entity profiling
 5. **Signature Detector** - 8 attack signatures (MITRE ATT&CK mapped)
+6. **High-Velocity Attack Detector** - Automated operation patterns (observed in real incidents)
+7. **Advanced Signature Detector** - Known malware family behaviors (GTIG documented)
+
+### 🦠 Behavioral Threat Detection (Fundamentals Over Hype)
+
+**Philosophy:** "Malware written by AI behaves like malware written by humans" - IBM X-Force
+
+**What AEGIS Actually Detects:**
+- **High-velocity automated attacks** - Behavioral patterns from real incidents
+  - Extreme request velocity (thousands/sec)
+  - Sequential system inspection
+  - Automated credential harvesting
+  - Multi-step automated operations
+
+- **Known malware family signatures** - Behavioral indicators, not "AI detection"
+  - API abuse patterns (Gemini, Hugging Face)
+  - Suspicious file system activity
+  - Runtime code generation requests
+  - Network traffic anomalies
+
+**Real-World Validation:**
+- Patterns observed in Chinese APT incident (Anthropic, Jan 2025)
+- Signatures from Google GTIG documented malware families (Nov 2025)
+- **Key insight**: These detectors catch malicious *behavior*, not "AI-ness"
+
+**See:** `docs/FUNDAMENTALS_OVER_HYPE.md` for detailed philosophy
 
 ### 🎭 Attack Simulation
 - **50+ Threat Types**: SQLi, XSS, Ransomware, DDoS, APT, Supply Chain
@@ -44,6 +70,17 @@ AEGIS is an **autonomous cyber defense agent** that detects, analyzes, and respo
 - **Quarantine**: Asset isolation
 - **Credential Rotation**: Automated password changes
 - **All actions logged for forensics**
+
+### 🔴 Red Team Capabilities (NEW - Offensive for Defense Validation)
+- **Purple Team Approach**: Integrated offensive + defensive testing
+- **7 Attack Simulations**: Full kill chain, high-velocity, stealth APT, ransomware, credential theft, supply chain, API abuse
+- **MITRE ATT&CK Coverage**: All 13 tactics simulated
+- **Real-Time Validation**: Proves defense works against actual attack patterns
+- **Effectiveness Scoring**: Measurable defensive performance metrics
+- **Ethical Framework**: Research and authorized testing only
+
+**Demo:** `python demo_red_vs_blue.py` - Watch red team attack, blue team defend
+**See:** `docs/RED_TEAM_CAPABILITIES.md` for full documentation
 
 ### 🔬 Forensics & Analysis
 - **BrowserUse Integration**: Attack replay for investigation
