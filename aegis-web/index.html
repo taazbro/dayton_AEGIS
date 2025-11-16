@@ -351,7 +351,158 @@
             margin-bottom: 8px;
         }
 
+        /* Demo Terminal */
+        .demo-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 8, 24, 0.98);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .demo-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-container {
+            max-width: 1600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .demo-header p {
+            color: var(--gray);
+            font-size: 18px;
+        }
+
+        .close-demo {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            background: rgba(255, 59, 48, 0.1);
+            border: 2px solid #ff3b30;
+            color: #ff3b30;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-demo:hover {
+            background: rgba(255, 59, 48, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .terminals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .terminal {
+            background: #1a1d2e;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .terminal-header {
+            background: #0d0f1a;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .terminal-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            height: 500px;
+            overflow-y: auto;
+            color: #e0e0e0;
+        }
+
+        .terminal-line {
+            margin-bottom: 4px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .prompt { color: var(--primary); }
+        .attack { color: #ff5f56; }
+        .warning { color: #ffbd2e; }
+        .success { color: #27c93f; }
+        .info { color: var(--secondary); }
+        .error { color: #ff3b30; }
+        .dim { color: #666; }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--primary);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
         /* Responsive */
+        @media (max-width: 1200px) {
+            .terminals-grid {
+                grid-template-columns: 1fr;
+            }
+            .terminal-body {
+                height: 350px;
+            }
+        }
+
         @media (max-width: 768px) {
             .hero h1 { font-size: 48px; }
             .hero p { font-size: 18px; }
@@ -359,6 +510,7 @@
             .nav-links { display: none; }
             .hero-stats { flex-direction: column; gap: 30px; }
             .features-grid { grid-template-columns: 1fr; }
+            .demo-header h2 { font-size: 28px; }
         }
     </style>
 </head>
@@ -393,11 +545,11 @@
             </p>
 
             <div class="cta-buttons">
-                <a href="https://github.com/taazbro/dayton_AEGIS" class="btn-primary" target="_blank">
+                <button class="btn-primary" onclick="startDemo()" style="cursor: pointer;">
+                    ▶️ Start Live Demo
+                </button>
+                <a href="https://github.com/taazbro/dayton_AEGIS" class="btn-secondary" target="_blank">
                     View Source Code
-                </a>
-                <a href="https://github.com/taazbro/dayton_AEGIS#demo" class="btn-secondary" target="_blank">
-                    Watch Live Demo
                 </a>
             </div>
 
@@ -559,5 +711,214 @@
             <p style="margin-top: 16px; color: #555;">Autonomous Defense. Zero Compromise. Production Ready.</p>
         </div>
     </footer>
+
+    <!-- Demo Overlay -->
+    <div class="demo-overlay" id="demoOverlay">
+        <div class="demo-container">
+            <div class="demo-header">
+                <h2>🛡️ AEGIS Live Defense Demonstration</h2>
+                <p>Watch autonomous cyber defense in action - real-time attack detection and response</p>
+                <button class="close-demo" onclick="closeDemo()">✕ Close Demo</button>
+            </div>
+
+            <div class="terminals-grid">
+                <!-- Terminal 1: Offense -->
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="terminal-dot dot-red"></div>
+                            <div class="terminal-dot dot-yellow"></div>
+                            <div class="terminal-dot dot-green"></div>
+                        </div>
+                        <div class="terminal-title">🔴 OFFENSIVE AGENT - SQL Injection Attack</div>
+                    </div>
+                    <div class="terminal-body" id="terminal1"></div>
+                </div>
+
+                <!-- Terminal 2: Defense -->
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="terminal-dot dot-red"></div>
+                            <div class="terminal-dot dot-yellow"></div>
+                            <div class="terminal-dot dot-green"></div>
+                        </div>
+                        <div class="terminal-title">🟢 AEGIS DEFENSE - Autonomous Response</div>
+                    </div>
+                    <div class="terminal-body" id="terminal2"></div>
+                </div>
+
+                <!-- Terminal 3: Slack Notification -->
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="terminal-dot dot-red"></div>
+                            <div class="terminal-dot dot-yellow"></div>
+                            <div class="terminal-dot dot-green"></div>
+                        </div>
+                        <div class="terminal-title">📊 SLACK NOTIFICATION - SOC Alert</div>
+                    </div>
+                    <div class="terminal-body" id="terminal3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo simulation data
+        const offenseLog = [
+            { text: '$ ./offensive_agent.py --target webapp --mode sql_injection', class: 'prompt' },
+            { text: '', class: '' },
+            { text: '[*] Initializing offensive AI agent...', class: 'info' },
+            { text: '[*] Target: webapp.aegis.local', class: 'info' },
+            { text: '[*] Attack Vector: SQL Injection', class: 'info' },
+            { text: '', class: '' },
+            { text: '[+] Scanning for injection points...', class: 'warning' },
+            { text: '[+] Found: /api/users/login', class: 'warning' },
+            { text: '[+] Found: /api/search', class: 'warning' },
+            { text: '', class: '' },
+            { text: '[!] Attempting SQL injection on /api/users/login', class: 'attack' },
+            { text: '    Payload: admin\' OR \'1\'=\'1', class: 'dim' },
+            { text: '    Response: 200 OK', class: 'attack' },
+            { text: '', class: '' },
+            { text: '[!] Attempting database enumeration...', class: 'attack' },
+            { text: '    SELECT * FROM users WHERE id=1 UNION SELECT schema_name...', class: 'dim' },
+            { text: '', class: '' },
+            { text: '[!] Attempting data exfiltration...', class: 'attack' },
+            { text: '    Query: SELECT username,password FROM users--', class: 'dim' },
+            { text: '', class: '' },
+            { text: '[X] Connection terminated by remote host', class: 'error' },
+            { text: '[X] Attack blocked at 4.7 seconds', class: 'error' },
+            { text: '[X] Session killed - AEGIS defense activated', class: 'error' }
+        ];
+
+        const defenseLog = [
+            { text: '🛡️  AEGIS Autonomous Defense System v2.0', class: 'success' },
+            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', class: 'dim' },
+            { text: '', class: '' },
+            { text: '[MONITOR] Behavioral analysis engine: ACTIVE', class: 'info' },
+            { text: '[MONITOR] Sentry telemetry: STREAMING', class: 'info' },
+            { text: '[MONITOR] Claude AI analyzer: READY', class: 'info' },
+            { text: '', class: '' },
+            { text: '⚠️  [ALERT] Anomalous behavior detected!', class: 'warning' },
+            { text: '    Source: 192.168.1.105', class: 'dim' },
+            { text: '    Pattern: SQL Injection (95% confidence)', class: 'dim' },
+            { text: '    Severity: CRITICAL', class: 'dim' },
+            { text: '', class: '' },
+            { text: '🔍 [ANALYZE] Behavioral scoring in progress...', class: 'info' },
+            { text: '    ✓ Signature match: SQL injection pattern', class: 'success' },
+            { text: '    ✓ Kill chain stage: Exploitation', class: 'success' },
+            { text: '    ✓ Threat score: 8.7/10', class: 'success' },
+            { text: '', class: '' },
+            { text: '🚨 [RESPONSE] Autonomous killswitch ACTIVATED', class: 'attack' },
+            { text: '    ⚡ Action 1: Session termination [0.3s]', class: 'warning' },
+            { text: '    ⚡ Action 2: IP block added [0.8s]', class: 'warning' },
+            { text: '    ⚡ Action 3: Database connection killed [1.2s]', class: 'warning' },
+            { text: '    ⚡ Action 4: WAF rules updated [2.1s]', class: 'warning' },
+            { text: '    ⚡ Action 5: Credential rotation initiated [3.4s]', class: 'warning' },
+            { text: '', class: '' },
+            { text: '🤖 [AI] Claude analyzing incident...', class: 'info' },
+            { text: '    ✓ Attack timeline reconstructed', class: 'success' },
+            { text: '    ✓ Impact assessment complete', class: 'success' },
+            { text: '    ✓ Incident report generated', class: 'success' },
+            { text: '', class: '' },
+            { text: '✅ [COMPLETE] Threat neutralized in 4.7 seconds', class: 'success' },
+            { text: '✅ [STATUS] Zero data loss - All systems secure', class: 'success' },
+            { text: '✅ [NOTIFY] SOC alert sent via Slack', class: 'success' }
+        ];
+
+        const slackLog = [
+            { text: '📡 Slack Webhook Integration', class: 'info' },
+            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', class: 'dim' },
+            { text: '', class: '' },
+            { text: '[*] Connecting to Slack API...', class: 'info' },
+            { text: '[*] Channel: #security-alerts', class: 'info' },
+            { text: '', class: '' },
+            { text: '📤 Sending SOC notification...', class: 'warning' },
+            { text: '', class: '' },
+            { text: '┌─────────────────────────────────────────┐', class: 'dim' },
+            { text: '│ 🚨 CRITICAL SECURITY INCIDENT           │', class: 'attack' },
+            { text: '├─────────────────────────────────────────┤', class: 'dim' },
+            { text: '│                                         │', class: '' },
+            { text: '│ Attack Type: SQL Injection              │', class: '' },
+            { text: '│ Severity: CRITICAL                      │', class: '' },
+            { text: '│ Source IP: 192.168.1.105                │', class: '' },
+            { text: '│ Confidence: 95%                         │', class: '' },
+            { text: '│                                         │', class: '' },
+            { text: '│ Timeline:                               │', class: '' },
+            { text: '│  → 00:00.0s: Attack detected            │', class: 'dim' },
+            { text: '│  → 00:00.3s: Session terminated         │', class: 'dim' },
+            { text: '│  → 00:04.7s: Threat neutralized         │', class: 'dim' },
+            { text: '│                                         │', class: '' },
+            { text: '│ Actions Taken:                          │', class: '' },
+            { text: '│  ✓ Session killed                       │', class: 'success' },
+            { text: '│  ✓ IP blocked                           │', class: 'success' },
+            { text: '│  ✓ Database secured                     │', class: 'success' },
+            { text: '│  ✓ WAF updated                          │', class: 'success' },
+            { text: '│  ✓ Credentials rotated                  │', class: 'success' },
+            { text: '│                                         │', class: '' },
+            { text: '│ Impact: ZERO DATA LOSS                  │', class: 'success' },
+            { text: '│ Status: All systems secure              │', class: 'success' },
+            { text: '│                                         │', class: '' },
+            { text: '└─────────────────────────────────────────┘', class: 'dim' },
+            { text: '', class: '' },
+            { text: '✅ Message delivered successfully', class: 'success' },
+            { text: '✅ SOC team notified in real-time', class: 'success' },
+            { text: '', class: '' },
+            { text: '[*] Response ID: msg_8bde70a4c77f', class: 'dim' },
+            { text: '[*] Timestamp: 2025-11-15 14:32:18 UTC', class: 'dim' }
+        ];
+
+        let demoRunning = false;
+
+        function startDemo() {
+            if (demoRunning) return;
+
+            demoRunning = true;
+            document.getElementById('demoOverlay').classList.add('active');
+
+            // Clear terminals
+            document.getElementById('terminal1').innerHTML = '';
+            document.getElementById('terminal2').innerHTML = '';
+            document.getElementById('terminal3').innerHTML = '';
+
+            // Run all three terminals in parallel
+            animateTerminal('terminal1', offenseLog, 80);
+            setTimeout(() => animateTerminal('terminal2', defenseLog, 70), 500);
+            setTimeout(() => animateTerminal('terminal3', slackLog, 90), 2000);
+        }
+
+        function closeDemo() {
+            document.getElementById('demoOverlay').classList.remove('active');
+            demoRunning = false;
+        }
+
+        function animateTerminal(terminalId, lines, speed) {
+            const terminal = document.getElementById(terminalId);
+            let lineIndex = 0;
+
+            function addLine() {
+                if (lineIndex < lines.length) {
+                    const line = lines[lineIndex];
+                    const div = document.createElement('div');
+                    div.className = `terminal-line ${line.class}`;
+                    div.textContent = line.text;
+                    terminal.appendChild(div);
+                    terminal.scrollTop = terminal.scrollHeight;
+                    lineIndex++;
+                    setTimeout(addLine, speed);
+                }
+            }
+
+            addLine();
+        }
+
+        // Close demo with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && demoRunning) {
+                closeDemo();
+            }
+        });
+    </script>
 </body>
 </html>
