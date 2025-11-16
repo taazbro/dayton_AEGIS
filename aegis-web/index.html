@@ -764,8 +764,11 @@
         </div>
     </div>
 
+    <!-- Load attack scenarios -->
+    <script src="scenarios.js"></script>
+
     <script>
-        // Demo simulation data
+        // OLD scenarios removed - using scenarios.js now
         const offenseLog = [
             { text: '$ ./offensive_agent.py --target webapp --mode sql_injection', class: 'prompt' },
             { text: '', class: '' },
@@ -877,14 +880,23 @@
             demoRunning = true;
             document.getElementById('demoOverlay').classList.add('active');
 
+            // Randomly select a scenario
+            const scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+
+            // Update terminal title with selected attack
+            document.querySelector('.terminal:nth-child(1) .terminal-title').textContent = '🔴 OFFENSIVE AGENT - ' + scenario.title;
+
             // Clear terminals
             document.getElementById('terminal1').innerHTML = '';
             document.getElementById('terminal2').innerHTML = '';
             document.getElementById('terminal3').innerHTML = '';
 
-            // Run all three terminals in parallel
-            animateTerminal('terminal1', offenseLog, 80);
-            setTimeout(() => animateTerminal('terminal2', defenseLog, 70), 500);
+            // Generate Slack log for this scenario
+            const slackLog = generateSlackLog(scenario.slack);
+
+            // Run all three terminals in parallel with selected scenario
+            animateTerminal('terminal1', scenario.offense, 80);
+            setTimeout(() => animateTerminal('terminal2', scenario.defense, 70), 500);
             setTimeout(() => animateTerminal('terminal3', slackLog, 90), 2000);
         }
 
