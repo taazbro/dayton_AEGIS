@@ -18,3 +18,4 @@ requests>=2.31.0
 
 # Security & Encryption
 cryptography>=41.0.0
+supabase==2.12.0

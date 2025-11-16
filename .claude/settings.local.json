@@ -21,7 +21,13 @@
       "Bash(.env)",
       "Bash(tee:*)",
       "Bash(/Applications/Python 3.12/Install Certificates.command)",
-      "Bash(timeout 600 python3:*)"
+      "Bash(timeout 600 python3:*)",
+      "Bash(npm install)",
+      "Bash(npx vercel:*)",
+      "Bash(open index.html)",
+      "Bash(open:*)",
+      "Bash(echo:*)",
+      "Bash(requirements.txt)"
     ],
     "deny": [],
     "ask": []
